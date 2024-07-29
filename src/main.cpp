@@ -12,6 +12,7 @@
 #include <ft2build.h>
 #include <Shader.h>
 
+#include "GeometryBuffer.h"
 #include "Program.h"
 
 #include FT_FREETYPE_H
@@ -46,19 +47,14 @@ int main(int argc, char** argv)
         0.0f,  0.9f, 0.0f,   0.0f, 0.0f, 1.0f
 };
 
-    GLuint vao, vbo;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW);
+    GeometryBuffer buffer;
+    buffer.bindVao();
+    buffer.setVBOData(sizeof(triangle), triangle, GL_STATIC_DRAW);
     /* Position attribute */
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
-    glEnableVertexAttribArray(0);
+    buffer.setVaoData(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), nullptr);
     /* Color attribute */
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-    glEnableVertexAttribArray(1);
-    glBindVertexArray(0);
+    buffer.setVaoData(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<GLvoid *>(3 * sizeof(GLfloat)));
+    buffer.unbindVao();
     program.linkAndUse();
     glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
 
@@ -72,9 +68,9 @@ int main(int argc, char** argv)
         glClearColor(0.0f, 0.1f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glBindVertexArray(vao);
+        buffer.bindVao();
         glDrawArrays(GL_TRIANGLES, 0, 3);
-        glBindVertexArray(0);
+        buffer.unbindVao();
 
         // swap buffer
         glfwSwapBuffers(window);

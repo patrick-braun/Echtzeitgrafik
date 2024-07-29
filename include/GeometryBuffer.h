@@ -21,20 +21,28 @@ public:
         glDeleteBuffers(1, &ebo);
     }
 
-    void bind() const {
+    void setVaoData(
+        GLuint index, GLint size,
+        GLenum type, GLboolean normalized,
+        GLsizei stride, const void *data) const {
+        glVertexAttribPointer(index, size, type, normalized, stride, data);
+        glEnableVertexAttribArray(index);
+    }
+
+    void bindVao() const {
         glBindVertexArray(vao);
     }
 
-    void unbind() const {
+    void unbindVao() const {
         glBindVertexArray(0);
     }
 
-    void setVBOData(GLsizeiptr size, const void* data, GLenum usage) const {
+    void setVBOData(GLsizeiptr size, const void *data, GLenum usage) const {
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, size, data, usage);
     }
 
-    void setEBOData(GLsizeiptr size, const void* data, GLenum usage) const {
+    void setEBOData(GLsizeiptr size, const void *data, GLenum usage) const {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, usage);
     }
