@@ -27,7 +27,9 @@ configure_file(src/helper/RootDir.h.in src/helper/RootDir.h)
 include_directories(${CMAKE_BINARY_DIR}/src)
 
 # Define the executable
-add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
+add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES}
+		src/Program.cpp
+		include/Program.h)
 
 # Search for additional libraries
 find_package(OpenGL REQUIRED)
