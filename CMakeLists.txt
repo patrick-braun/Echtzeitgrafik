@@ -29,7 +29,9 @@ include_directories(${CMAKE_BINARY_DIR}/src)
 # Define the executable
 add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES}
 		src/Program.cpp
-		include/Program.h)
+		include/Program.h
+		src/GeometryBuffer.cpp
+		include/GeometryBuffer.h)
 
 # Search for additional libraries
 find_package(OpenGL REQUIRED)

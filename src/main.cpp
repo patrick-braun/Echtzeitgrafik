@@ -3,6 +3,8 @@
 #define GLEW_STATIC
 #include <filesystem>
 #include <fstream>
+#include <string>
+#include <sstream>
 #include <GL/glew.h> // has to be included first!
 #include <GLFW/glfw3.h>
 #include <assimp/Importer.hpp>
@@ -16,6 +18,8 @@
 #include "helper/RootDir.h"
 
 #include "helper/functions.h"
+
+
 
 int main(int argc, char** argv)
 {
@@ -59,6 +63,9 @@ int main(int argc, char** argv)
     glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
 
 
+    double lastTime = glfwGetTime();
+    int frames = 0;
+
     while (glfwWindowShouldClose(window) == 0)
     {
         // clear the window
@@ -74,6 +81,22 @@ int main(int argc, char** argv)
 
         // process user events
         glfwPollEvents();
+
+        double currentTime = glfwGetTime();
+        double delta = currentTime - lastTime;
+        frames++;
+        if ( delta >= 1.0 ){
+
+            double fps = static_cast<double>(frames) / delta;
+
+            std::ostringstream ss;
+            ss << "Echtzeitgrafik - FPS: " << fps;
+
+            glfwSetWindowTitle(window, ss.str().c_str());
+
+            frames = 0;
+            lastTime = currentTime;
+        }
     }
 
     glfwTerminate();
