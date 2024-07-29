@@ -7,6 +7,13 @@
 
 #define INFOLOG_LEN 512
 
+inline std::string readResToString(const std::string &resName) {
+    std::ifstream filePath(ROOT_DIR "res/" + resName);
+    std::string str((std::istreambuf_iterator(filePath)), std::istreambuf_iterator<char>());
+    return str;
+}
+
+
 inline GLFWwindow* initAndCreateWindow(int width = 800, int height = 600, bool debugContext = false)
 {
     // created window

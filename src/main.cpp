@@ -1,6 +1,8 @@
 #include <iostream>
 
 #define GLEW_STATIC
+#include <filesystem>
+#include <fstream>
 #include <GL/glew.h> // has to be included first!
 #include <GLFW/glfw3.h>
 #include <assimp/Importer.hpp>
@@ -21,25 +23,11 @@ int main(int argc, char** argv)
     GLFWwindow* window = initAndCreateWindow();
     glViewport(0, 0, 800, 600);
 
-    static const GLchar* simpleVertexShaderSource =
-"#version 330 core\n"
-"layout (location = 0) in vec3 position;\n"
-"layout (location = 1) in vec3 color;\n"
-"out vec3 ourColor;\n"
-"void main() {\n"
-" gl_Position = vec4(position, 1.0f);\n"
-" ourColor = color;\n"
-"}\0";
-    static const GLchar* simpleFragmentShaderSource =
-    "#version 330 core\n"
-    "in vec3 ourColor;\n"
-    "out vec4 color;\n"
-    "void main() {\n"
-    " color = vec4(ourColor, 1.0f);\n"
-    "}\0";
+    const std::string vertexShaderSource = readResToString("shader.vert");
+    const std::string fragmentShaderSource = readResToString("shader.frag");
 
-    Shader vert(simpleVertexShaderSource, GL_VERTEX_SHADER);
-    Shader frag(simpleFragmentShaderSource, GL_FRAGMENT_SHADER);
+    Shader vert(vertexShaderSource.c_str(), GL_VERTEX_SHADER);
+    Shader frag(fragmentShaderSource.c_str(), GL_FRAGMENT_SHADER);
 
     Program program;
 
