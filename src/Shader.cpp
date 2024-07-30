@@ -21,20 +21,20 @@ void Shader::setUniform(const std::string &name, const float value) const {
     glUniform1f(loc, value);
 }
 
-void Shader::setUniform(const std::string &name, const glm::vec3 value) const {
+void Shader::setUniform(const std::string &name, const glm::vec3 &value) const {
     const auto loc = glGetUniformLocation(this->glShader, name.c_str());
     if (loc == -1) {
         throw std::runtime_error("Uniform not found: " + name);
     }
-    glUniform3f(loc, value[0], value[1], value[2]);
+    glUniform3fv(loc, 1, value_ptr(value));
 }
 
-void Shader::setUniform(const std::string &name, const glm::vec4 value) const {
+void Shader::setUniform(const std::string &name, const glm::vec4 &value) const {
     const auto loc = glGetUniformLocation(this->glShader, name.c_str());
     if (loc == -1) {
         throw std::runtime_error("Uniform not found: " + name);
     }
-    glUniform4f(loc, value[0], value[1], value[2], value[3]);
+    glUniform4fv(loc, 1, value_ptr(value));
 }
 
 void Shader::setUniform(const std::string &name, const glm::mat4 &value) const {
