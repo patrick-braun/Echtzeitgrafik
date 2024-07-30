@@ -48,13 +48,11 @@ int main(int argc, char** argv)
 };
 
     GeometryBuffer buffer;
-    buffer.bindVao();
     buffer.setVBOData(sizeof(triangle), triangle, GL_STATIC_DRAW);
     /* Position attribute */
-    buffer.setVaoData(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), nullptr);
+    buffer.setVAOData(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), nullptr);
     /* Color attribute */
-    buffer.setVaoData(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<GLvoid *>(3 * sizeof(GLfloat)));
-    buffer.unbindVao();
+    buffer.setVAOData(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<GLvoid *>(3 * sizeof(GLfloat)));
     program.linkAndUse();
     glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
 
@@ -68,9 +66,9 @@ int main(int argc, char** argv)
         glClearColor(0.0f, 0.1f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        buffer.bindVao();
+        buffer.bindVAO();
         glDrawArrays(GL_TRIANGLES, 0, 3);
-        buffer.unbindVao();
+        buffer.unbindVAO();
 
         // swap buffer
         glfwSwapBuffers(window);

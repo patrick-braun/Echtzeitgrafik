@@ -21,19 +21,21 @@ public:
         glDeleteBuffers(1, &ebo);
     }
 
-    void setVaoData(
+    void setVAOData(
         GLuint index, GLint size,
         GLenum type, GLboolean normalized,
         GLsizei stride, const void *data) const {
+        glBindVertexArray(vao);
         glVertexAttribPointer(index, size, type, normalized, stride, data);
         glEnableVertexAttribArray(index);
+        glBindVertexArray(0);
     }
 
-    void bindVao() const {
+    void bindVAO() const {
         glBindVertexArray(vao);
     }
 
-    void unbindVao() const {
+    void unbindVAO() const {
         glBindVertexArray(0);
     }
 
