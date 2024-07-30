@@ -7,6 +7,8 @@
 #include <Shader.h>
 #include <GL/glew.h>
 
+#include "PointLight.h"
+
 
 class Program {
 public:

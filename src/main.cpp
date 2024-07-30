@@ -16,6 +16,7 @@
 #include <GeometryBuffer.h>
 #include <Program.h>
 
+#include "PointLight.h"
 #include "Settings.h"
 #include "helper/functions.h"
 #include "helper/data.h"
@@ -34,14 +35,13 @@ void setupKeybinds(GLFWwindow *window) {
 }
 
 void registerDebugHandler() {
-    int flags; glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
-    if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
-    {
+    int flags;
+    glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+    if (flags & GL_CONTEXT_FLAG_DEBUG_BIT) {
         // initialize debug output
         auto debugCallback = [](
             GLenum source, GLenum type, GLuint id, GLenum severity,
-            GLsizei messageLength, const GLchar* message, const void* userParam)
-        {
+            GLsizei messageLength, const GLchar *message, const void *userParam) {
             std::cerr << "[OpenGL] " << id << ": " << message << std::endl;
         };
         glEnable(GL_DEBUG_OUTPUT);
@@ -60,26 +60,29 @@ int main(int argc, char **argv) {
     const std::string fragmentShaderSource = readResToString("shader.frag");
 
     Program program;
-
-    { // Scoped to call destructor for cleanup
+    try {
+        // Scoped to call destructor for cleanup
         Shader vert(vertexShaderSource.c_str(), GL_VERTEX_SHADER);
         Shader frag(fragmentShaderSource.c_str(), GL_FRAGMENT_SHADER);
 
         program.attach(vert);
         program.attach(frag);
         program.linkAndUse();
+    } catch (std::runtime_error &e) {
+        std::cout << e.what() << std::endl;
+        glfwTerminate();
+        exit(1);
     }
-
 
 
     GeometryBuffer buffer;
     buffer.setVBOData(sizeof(cube), cube, GL_STATIC_DRAW);
     /* Position attribute */
-    buffer.setVAOData(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), nullptr);
+    buffer.setVAOData(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), nullptr);
     /* Color attribute */
-    buffer.setVAOData(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<GLvoid *>(3 * sizeof(GLfloat)));
-
-    //buffer.setEBOData(sizeof(indices), indices, GL_STATIC_DRAW);
+    buffer.setVAOData(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), reinterpret_cast<GLvoid *>(3 * sizeof(GLfloat)));
+    /* Normal attribute */
+    buffer.setVAOData(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), reinterpret_cast<GLvoid *>(6 * sizeof(GLfloat)));
 
     program.linkAndUse();
     glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
@@ -95,18 +98,30 @@ int main(int argc, char **argv) {
     int frames = 0;
     glm::mat4 perspective = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 1000.0f);
     glm::mat4 orthographic = glm::ortho(-4.0f, 4.0f, -3.0f, 3.0f, 0.1f, 1000.0f);
+    PointLight p = PointLight(glm::vec3(0.0f, 0.0f, 7.0f), glm::vec3(1.0f, 1.0f, 1.0f), 3.0f, {1.0f, 0.14f, 0.07f});
 
 
     while (glfwWindowShouldClose(window) == 0) {
         glm::mat4 model = glm::mat4(1.0f), view = glm::mat4(1.0f);
 
-        model = glm::rotate(model, static_cast<float>(glfwGetTime()) * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+        model = glm::rotate(model, static_cast<float>(glfwGetTime()) * glm::radians(50.0f),
+                            glm::vec3(0.5f, 1.0f, 0.0f));
         model = glm::scale(model, glm::vec3(1.5f, 1.5f, 1.5f));
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -6.0f));
+        auto viewPos = glm::vec3(0.0f, 0.0f, 6.0f);
+        view = glm::translate(view, -viewPos);
+
 
         try {
             program.setUniform("u_model", model);
             program.setUniform("u_view", view);
+            program.setUniform("u_viewPos", viewPos);
+            //program.setUniform("u_normal", glm::vec3(1.0f, 0.0f, 0.0f));
+            program.setUniform("u_light.position", p.getPosition());
+            program.setUniform("u_light.color", p.getColor());
+            program.setUniform("u_light.intensity", p.getIntensity());
+            program.setUniform("u_light.constant", p.getAttenuation().constant);
+            program.setUniform("u_light.linear", p.getAttenuation().linear);
+            program.setUniform("u_light.quadratic", p.getAttenuation().quadratic);
             if (settings.getProjectionType() == ProjectionType::PERSPECTIVE) {
                 program.setUniform("u_projection", perspective);
             } else {

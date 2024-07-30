@@ -6,6 +6,8 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
+#include "PointLight.h"
+
 void Program::setUniform(const std::string &name, const int value) const {
     const auto loc = glGetUniformLocation(this->glProgram, name.c_str());
     if (loc == -1) {
