@@ -27,11 +27,7 @@ configure_file(src/helper/RootDir.h.in src/helper/RootDir.h)
 include_directories(${CMAKE_BINARY_DIR}/src)
 
 # Define the executable
-add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES}
-		src/Program.cpp
-		include/Program.h
-		src/GeometryBuffer.cpp
-		include/GeometryBuffer.h)
+add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
 
 # Search for additional libraries
 find_package(OpenGL REQUIRED)

@@ -5,6 +5,8 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <helper/RootDir.h>
+
 #define INFOLOG_LEN 512
 
 inline std::string readResToString(const std::string &resName) {

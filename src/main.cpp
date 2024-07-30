@@ -11,21 +11,24 @@
 #include <glm/glm.hpp>
 #include <ft2build.h>
 #include <Shader.h>
-
-#include "GeometryBuffer.h"
-#include "Program.h"
-
-#include FT_FREETYPE_H
-#include "helper/RootDir.h"
-
+#include <GeometryBuffer.h>
+#include <Program.h>
 #include "helper/functions.h"
 
 
+void setupKeybinds(GLFWwindow *window) {
+    auto callback = [](GLFWwindow *window, int key, int scancode, int action, int mods) {
+        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+            glfwSetWindowShouldClose(window, 1);
 
-int main(int argc, char** argv)
-{
+        }
+    };
+    glfwSetKeyCallback(window, callback);
+}
 
-    GLFWwindow* window = initAndCreateWindow();
+
+int main(int argc, char **argv) {
+    GLFWwindow *window = initAndCreateWindow();
     glViewport(0, 0, 800, 600);
 
     const std::string vertexShaderSource = readResToString("shader.vert");
@@ -40,7 +43,7 @@ int main(int argc, char** argv)
     program.attach(frag);
 
     GLfloat triangle[] =
-{
+    {
         /*   Positions            Colors */
         0.9f, -0.9f, 0.0f,   1.0f, 0.0f, 0.0f,
        -0.9f, -0.9f, 0.0f,   0.0f, 1.0f, 0.0f,
@@ -56,12 +59,14 @@ int main(int argc, char** argv)
     program.linkAndUse();
     glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
 
+    glfwSwapInterval(1); // Enable vsync
+
+    setupKeybinds(window);
 
     double lastTime = glfwGetTime();
     int frames = 0;
 
-    while (glfwWindowShouldClose(window) == 0)
-    {
+    while (glfwWindowShouldClose(window) == 0) {
         // clear the window
         glClearColor(0.0f, 0.1f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -79,8 +84,7 @@ int main(int argc, char** argv)
         double currentTime = glfwGetTime();
         double delta = currentTime - lastTime;
         frames++;
-        if ( delta >= 1.0 ){
-
+        if (delta >= 1.0) {
             double fps = static_cast<double>(frames) / delta;
 
             std::ostringstream ss;
