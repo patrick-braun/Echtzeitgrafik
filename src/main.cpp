@@ -73,16 +73,16 @@ int main(int argc, char **argv) {
 
 
     GeometryBuffer buffer;
-    buffer.setVBOData(sizeof(rectangleIndexed), rectangleIndexed, GL_STATIC_DRAW);
+    buffer.setVBOData(sizeof(cube), cube, GL_STATIC_DRAW);
     /* Position attribute */
     buffer.setVAOData(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), nullptr);
     /* Color attribute */
     buffer.setVAOData(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<GLvoid *>(3 * sizeof(GLfloat)));
 
-    buffer.setEBOData(sizeof(indices), indices, GL_STATIC_DRAW);
+    //buffer.setEBOData(sizeof(indices), indices, GL_STATIC_DRAW);
 
     program.linkAndUse();
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
     glEnable(GL_DEPTH_TEST);
 
     glfwSwapInterval(1); // Enable vsync
@@ -93,19 +93,25 @@ int main(int argc, char **argv) {
 
     double lastTime = glfwGetTime();
     int frames = 0;
+    glm::mat4 perspective = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 1000.0f);
+    glm::mat4 orthographic = glm::ortho(-4.0f, 4.0f, -3.0f, 3.0f, 0.1f, 1000.0f);
+
 
     while (glfwWindowShouldClose(window) == 0) {
         glm::mat4 model = glm::mat4(1.0f), view = glm::mat4(1.0f);
-        glm::mat4 projection;
+
         model = glm::rotate(model, static_cast<float>(glfwGetTime()) * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
         model = glm::scale(model, glm::vec3(1.5f, 1.5f, 1.5f));
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-        projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 1000.0f);
+        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -6.0f));
 
         try {
             program.setUniform("u_model", model);
             program.setUniform("u_view", view);
-            program.setUniform("u_projection", projection);
+            if (settings.getProjectionType() == ProjectionType::PERSPECTIVE) {
+                program.setUniform("u_projection", perspective);
+            } else {
+                program.setUniform("u_projection", orthographic);
+            }
         } catch (const std::runtime_error &e) {
             std::cerr << e.what() << std::endl;
             glfwTerminate();
@@ -117,7 +123,7 @@ int main(int argc, char **argv) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         buffer.bindVAO();
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
         buffer.unbindVAO();
 
         // swap buffer

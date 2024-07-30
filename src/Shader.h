@@ -33,11 +33,13 @@ public:
 
     Shader &operator=(const Shader &) = delete;
 
-    Shader(Shader &&other) noexcept;
+    Shader(Shader &&other) = delete;
 
-    Shader &operator=(Shader &&other) noexcept;
+    Shader &operator=(Shader &&other) = delete;
 
-    virtual ~Shader();
+    virtual ~Shader() {
+        glDeleteShader(this->glShader);
+    }
 
     [[nodiscard]] GLuint getGlShader() const {
         return glShader;

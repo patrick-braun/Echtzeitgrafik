@@ -3,9 +3,3 @@
 //
 
 #include "Shader.h"
-#include <glm/gtc/type_ptr.hpp>
-
-
-Shader::~Shader() {
-    glDeleteShader(this->glShader);
-}
