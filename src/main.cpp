@@ -34,18 +34,25 @@ void setupKeybinds(GLFWwindow *window) {
 }
 
 void registerDebugHandler() {
-    auto debugCallback = [](
-        GLenum source, GLenum type, GLuint id, GLenum severity,
-        GLsizei messageLength, const GLchar* message, const void* userParam)
+    int flags; glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+    if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
     {
-        std::cerr << "[OpenGL] " << id << ": " << message << std::endl;
-    };
-    glEnable(GL_DEBUG_OUTPUT);
-    glDebugMessageCallback(debugCallback, nullptr);
+        // initialize debug output
+        auto debugCallback = [](
+            GLenum source, GLenum type, GLuint id, GLenum severity,
+            GLsizei messageLength, const GLchar* message, const void* userParam)
+        {
+            std::cerr << "[OpenGL] " << id << ": " << message << std::endl;
+        };
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageCallback(debugCallback, nullptr);
+    }
 }
 
 
 int main(int argc, char **argv) {
+    registerDebugHandler();
     GLFWwindow *window = initAndCreateWindow();
     glViewport(0, 0, 800, 600);
 
@@ -60,6 +67,7 @@ int main(int argc, char **argv) {
 
         program.attach(vert);
         program.attach(frag);
+        program.linkAndUse();
     }
 
     GLfloat triangle[] =
@@ -76,7 +84,7 @@ int main(int argc, char **argv) {
     buffer.setVAOData(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), nullptr);
     /* Color attribute */
     buffer.setVAOData(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<GLvoid *>(3 * sizeof(GLfloat)));
-    program.linkAndUse();
+    //program.linkAndUse();
     glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
 
     glfwSwapInterval(1); // Enable vsync
