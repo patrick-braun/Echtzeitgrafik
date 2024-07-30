@@ -45,8 +45,10 @@ public:
     }
 
     void setEBOData(GLsizeiptr size, const void *data, GLenum usage) const {
+        bindVAO();
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, usage);
+        unbindVAO();
     }
 
 private:

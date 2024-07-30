@@ -10,11 +10,11 @@
 #include <assimp/Importer.hpp>
 #include <glm/glm.hpp>
 #include <ft2build.h>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <Shader.h>
 #include <GeometryBuffer.h>
 #include <Program.h>
-#include <glm/ext/matrix_clip_space.hpp>
-#include <glm/ext/matrix_transform.hpp>
 
 #include "Settings.h"
 #include "helper/functions.h"
@@ -70,25 +70,34 @@ int main(int argc, char **argv) {
         program.linkAndUse();
     }
 
-    GLfloat triangle[] =
-    {
-        /*   Positions            Colors */
-        0.9f, -0.9f, 0.0f,   1.0f, 0.0f, 0.0f,
-       -0.9f, -0.9f, 0.0f,   0.0f, 1.0f, 0.0f,
-        0.0f,  0.9f, 0.0f,   0.0f, 0.0f, 1.0f
-};
+    float rectangleIndexed[] =
+{
+        0.5f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f,// top right
+        0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f,// bottom right
+       -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,// bottom left
+       -0.5f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f // top left
+   };
+
 
     GeometryBuffer buffer;
-    buffer.setVBOData(sizeof(triangle), triangle, GL_STATIC_DRAW);
+    buffer.setVBOData(sizeof(rectangleIndexed), rectangleIndexed, GL_STATIC_DRAW);
     /* Position attribute */
     buffer.setVAOData(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), nullptr);
     /* Color attribute */
     buffer.setVAOData(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<GLvoid *>(3 * sizeof(GLfloat)));
-    //program.linkAndUse();
-    glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
+
+    unsigned int indices[] =
+        {  // note that we start from 0!
+        0, 1, 3,   // first triangle
+        1, 2, 3    // second triangle
+    };
+    buffer.setEBOData(sizeof(indices), indices, GL_STATIC_DRAW);
+
+    program.linkAndUse();
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glEnable(GL_DEPTH_TEST);
 
     glfwSwapInterval(1); // Enable vsync
-    glEnable(GL_DEPTH_TEST);
 
     auto settings = Settings();
     glfwSetWindowUserPointer(window, &settings);
@@ -120,7 +129,7 @@ int main(int argc, char **argv) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         buffer.bindVAO();
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
         buffer.unbindVAO();
 
         // swap buffer
