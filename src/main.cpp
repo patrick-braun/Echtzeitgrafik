@@ -18,7 +18,7 @@
 
 #include "Settings.h"
 #include "helper/functions.h"
-
+#include "helper/data.h"
 
 void setupKeybinds(GLFWwindow *window) {
     auto callback = [](GLFWwindow *window, int key, int scancode, int action, int mods) {
@@ -70,13 +70,6 @@ int main(int argc, char **argv) {
         program.linkAndUse();
     }
 
-    float rectangleIndexed[] =
-{
-        0.5f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f,// top right
-        0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f,// bottom right
-       -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,// bottom left
-       -0.5f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f // top left
-   };
 
 
     GeometryBuffer buffer;
@@ -86,11 +79,6 @@ int main(int argc, char **argv) {
     /* Color attribute */
     buffer.setVAOData(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<GLvoid *>(3 * sizeof(GLfloat)));
 
-    unsigned int indices[] =
-        {  // note that we start from 0!
-        0, 1, 3,   // first triangle
-        1, 2, 3    // second triangle
-    };
     buffer.setEBOData(sizeof(indices), indices, GL_STATIC_DRAW);
 
     program.linkAndUse();
