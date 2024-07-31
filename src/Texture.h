@@ -21,7 +21,6 @@ public:
         if (!imageData) {
             std::cerr << "Failed to load texture!" << std::endl;
         }
-        std::cout << width << " " << height << " " << nrChannels << std::endl;
         glGenTextures(1, &glTexture);
         glBindTexture(GL_TEXTURE_2D, glTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);

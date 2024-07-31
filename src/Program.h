@@ -41,8 +41,11 @@ public:
         glAttachShader(glProgram, shader.getGlShader());
     }
 
-    void linkAndUse() const {
+    void link() const {
         glLinkProgram(glProgram);
+    }
+
+    void use() const {
         glUseProgram(glProgram);
     }
 

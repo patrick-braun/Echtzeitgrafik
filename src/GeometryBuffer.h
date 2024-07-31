@@ -32,9 +32,9 @@ public:
         other.ebo = 0;
     }
 
-    GeometryBuffer & operator=(const GeometryBuffer &other) = delete;
+    GeometryBuffer &operator=(const GeometryBuffer &other) = delete;
 
-    GeometryBuffer & operator=(GeometryBuffer &&other) noexcept {
+    GeometryBuffer &operator=(GeometryBuffer &&other) noexcept {
         if (this == &other)
             return *this;
         vbo = other.vbo;
@@ -69,14 +69,20 @@ public:
         glBufferData(GL_ARRAY_BUFFER, size, data, usage);
     }
 
-    void setEBOData(GLsizeiptr size, const void *data, GLenum usage) const {
+    void setEBOData(GLsizeiptr size, const void *data, GLenum usage, int elementCount) {
         bindVAO();
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, usage);
+        eboSize = elementCount;
         unbindVAO();
     }
 
+    [[nodiscard]] int getEBOSize() const {
+        return eboSize;
+    }
+
 private:
+    int eboSize;
     GLuint vbo, vao, ebo;
 };
 

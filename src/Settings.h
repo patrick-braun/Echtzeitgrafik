@@ -38,9 +38,18 @@ public:
         return projectionType;
     }
 
+    [[nodiscard]] int getSpeed() const {
+        return speed;
+    }
+
+    void setSpeed(int speed) {
+        this->speed = speed;
+    }
+
 private:
     ProjectionType projectionType;
-    bool paused{};
+    bool paused = false;
+    int speed = 1;
 };
 
 

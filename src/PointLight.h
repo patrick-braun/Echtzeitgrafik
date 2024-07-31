@@ -15,10 +15,12 @@ struct attenuation {
 
 class PointLight {
 public:
+    PointLight() = default;
+
     PointLight(glm::vec3 position, glm::vec3 color, float intensity,
                attenuation attenuation_components) : position(position),
                                                      color(color), intensity(intensity),
-                                                     attenuation_components(attenuation_components) {
+                                                     attenuationComponents(attenuation_components) {
     }
 
     [[nodiscard]] const glm::vec3 &getPosition() const {
@@ -34,14 +36,30 @@ public:
     }
 
     [[nodiscard]] attenuation getAttenuation() const {
-        return attenuation_components;
+        return attenuationComponents;
+    }
+
+    void setPosition(const glm::vec3 &position) {
+        this->position = position;
+    }
+
+    void setColor(const glm::vec3 &color) {
+        this->color = color;
+    }
+
+    void setIntensity(float intensity) {
+        this->intensity = intensity;
+    }
+
+    void setAttenuation(const attenuation &attenuation) {
+        this->attenuationComponents = attenuation;
     }
 
 private:
     glm::vec3 position;
     glm::vec3 color;
     float intensity;
-    attenuation attenuation_components;
+    attenuation attenuationComponents;
 };
 
 

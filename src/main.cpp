@@ -7,20 +7,21 @@
 #include <sstream>
 #include <GL/glew.h> // has to be included first!
 #include <GLFW/glfw3.h>
-#include <assimp/Importer.hpp>
 #include <glm/glm.hpp>
 #include <ft2build.h>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <Shader.h>
 #include <GeometryBuffer.h>
 #include <Program.h>
 
 #include "PointLight.h"
 #include "Settings.h"
+#include "SolarSystem.h"
 #include "Texture.h"
 #include "helper/functions.h"
 #include "helper/data.h"
+
+#include <glm/gtx/string_cast.hpp>
 
 void setupKeybinds(GLFWwindow *window) {
     auto callback = [](GLFWwindow *window, int key, int scancode, int action, int mods) {
@@ -33,6 +34,12 @@ void setupKeybinds(GLFWwindow *window) {
         }
         if (key == GLFW_KEY_P && action == GLFW_PRESS) {
             settings->togglePause();
+        }
+        if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) {
+            settings->setSpeed(settings->getSpeed() * 2);
+        }
+        if (key == GLFW_KEY_LEFT && action == GLFW_PRESS) {
+            settings->setSpeed(std::max(settings->getSpeed() / 2, 1));
         }
     };
     glfwSetKeyCallback(window, callback);
@@ -71,7 +78,7 @@ int main(int argc, char **argv) {
 
         program.attach(vert);
         program.attach(frag);
-        program.linkAndUse();
+        program.link();
     } catch (std::runtime_error &e) {
         std::cout << e.what() << std::endl;
         glfwTerminate();
@@ -88,8 +95,8 @@ int main(int argc, char **argv) {
     /* Normal attribute */
     buffer.setVAOData(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), reinterpret_cast<GLvoid *>(6 * sizeof(GLfloat)));
 
-    program.linkAndUse();
-    glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
+    program.use();
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glEnable(GL_DEPTH_TEST);
 
     glfwSwapInterval(1); // Enable vsync
@@ -98,43 +105,36 @@ int main(int argc, char **argv) {
     glfwSetWindowUserPointer(window, &settings);
     setupKeybinds(window);
 
-    Texture texture("2k_mars.jpg");
+    SolarSystem solarSystem("sphere.obj");
+    auto l = solarSystem.getLight();
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture.getGlTexture());
-    program.setUniform("u_img", 0);
-
-    double lastTime = glfwGetTime();
     int frames = 0;
+    double fpsMeasureThreshold = 0;
+    double simTime = 0;
+
     glm::mat4 perspective = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 1000.0f);
     glm::mat4 orthographic = glm::ortho(-4.0f, 4.0f, -3.0f, 3.0f, 0.1f, 1000.0f);
-    PointLight p = PointLight(glm::vec3(0.0f, 0.0f, 7.0f), glm::vec3(1.0f, 1.0f, 1.0f), 3.0f, {1.0f, 0.14f, 0.07f});
+    auto viewPos = glm::vec3(0.0f, 0.0f, 6.0f);
+    auto view = translate(glm::mat4(1.0f), -viewPos);
 
     double timeSnapshot = 0;
+    double prevTimeSnapshot = glfwGetTime();
     while (glfwWindowShouldClose(window) == 0) {
         if (!settings.isPaused()) {
+            prevTimeSnapshot = timeSnapshot;
             timeSnapshot = glfwGetTime();
         }
-        glm::mat4 model = glm::mat4(1.0f), view = glm::mat4(1.0f);
-
-        model = glm::rotate(model, static_cast<float>(timeSnapshot) * glm::radians(50.0f),
-                            glm::vec3(0.5f, 1.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(1.5f, 1.5f, 1.5f));
-        auto viewPos = glm::vec3(0.0f, 0.0f, 6.0f);
-        view = glm::translate(view, -viewPos);
-
+        program.use();
 
         try {
-            program.setUniform("u_model", model);
             program.setUniform("u_view", view);
             program.setUniform("u_viewPos", viewPos);
-            //program.setUniform("u_normal", glm::vec3(1.0f, 0.0f, 0.0f));
-            program.setUniform("u_light.position", p.getPosition());
-            program.setUniform("u_light.color", p.getColor());
-            program.setUniform("u_light.intensity", p.getIntensity());
-            program.setUniform("u_light.constant", p.getAttenuation().constant);
-            program.setUniform("u_light.linear", p.getAttenuation().linear);
-            program.setUniform("u_light.quadratic", p.getAttenuation().quadratic);
+            program.setUniform("u_light.position", l.getPosition());
+            program.setUniform("u_light.color", l.getColor());
+            program.setUniform("u_light.intensity", l.getIntensity());
+            program.setUniform("u_light.constant", l.getAttenuation().constant);
+            program.setUniform("u_light.linear", l.getAttenuation().linear);
+            program.setUniform("u_light.quadratic", l.getAttenuation().quadratic);
             if (settings.getProjectionType() == ProjectionType::PERSPECTIVE) {
                 program.setUniform("u_projection", perspective);
             } else {
@@ -149,11 +149,20 @@ int main(int argc, char **argv) {
         // clear the window
         glClearColor(0.0f, 0.1f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        texture.bind();
 
-        buffer.bindVAO();
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        buffer.unbindVAO();
+        for (int i = 0; i < solarSystem.getBodies()->size(); ++i) {
+            CelestialBody *body = &(*solarSystem.getBodies())[i];
+            auto model = body->getTransformationMatrix(simTime);
+            try {
+                program.setUniform("u_model", model);
+            } catch (const std::runtime_error &e) {
+                std::cerr << e.what() << std::endl;
+                glfwTerminate();
+                exit(1);
+            }
+            body->render();
+        }
+
 
         // swap buffer
         glfwSwapBuffers(window);
@@ -161,11 +170,13 @@ int main(int argc, char **argv) {
         // process user events
         glfwPollEvents();
 
-        double currentTime = glfwGetTime();
-        double delta = currentTime - lastTime;
         frames++;
-        if (delta >= 1.0) {
-            double fps = static_cast<double>(frames) / delta;
+        double frameDelta = timeSnapshot - prevTimeSnapshot;
+        simTime += frameDelta * 24 * settings.getSpeed();
+        fpsMeasureThreshold += frameDelta;
+        if (fpsMeasureThreshold >= 1.0) {
+            std::cout << simTime << " " << frameDelta << std::endl;
+            double fps = static_cast<double>(frames) / fpsMeasureThreshold;
 
             std::ostringstream ss;
             ss << "Echtzeitgrafik - FPS: " << fps;
@@ -173,7 +184,7 @@ int main(int argc, char **argv) {
             glfwSetWindowTitle(window, ss.str().c_str());
 
             frames = 0;
-            lastTime = currentTime;
+            fpsMeasureThreshold = glm::mod(fpsMeasureThreshold, 1.0);
         }
     }
 
