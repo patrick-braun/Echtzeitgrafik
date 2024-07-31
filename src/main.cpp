@@ -18,6 +18,7 @@
 
 #include "PointLight.h"
 #include "Settings.h"
+#include "Texture.h"
 #include "helper/functions.h"
 #include "helper/data.h"
 
@@ -29,6 +30,9 @@ void setupKeybinds(GLFWwindow *window) {
         }
         if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
             settings->toggleProjectionType();
+        }
+        if (key == GLFW_KEY_P && action == GLFW_PRESS) {
+            settings->togglePause();
         }
     };
     glfwSetKeyCallback(window, callback);
@@ -94,17 +98,26 @@ int main(int argc, char **argv) {
     glfwSetWindowUserPointer(window, &settings);
     setupKeybinds(window);
 
+    Texture texture("2k_mars.jpg");
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture.getGlTexture());
+    program.setUniform("u_img", 0);
+
     double lastTime = glfwGetTime();
     int frames = 0;
     glm::mat4 perspective = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 1000.0f);
     glm::mat4 orthographic = glm::ortho(-4.0f, 4.0f, -3.0f, 3.0f, 0.1f, 1000.0f);
     PointLight p = PointLight(glm::vec3(0.0f, 0.0f, 7.0f), glm::vec3(1.0f, 1.0f, 1.0f), 3.0f, {1.0f, 0.14f, 0.07f});
 
-
+    double timeSnapshot = 0;
     while (glfwWindowShouldClose(window) == 0) {
+        if (!settings.isPaused()) {
+            timeSnapshot = glfwGetTime();
+        }
         glm::mat4 model = glm::mat4(1.0f), view = glm::mat4(1.0f);
 
-        model = glm::rotate(model, static_cast<float>(glfwGetTime()) * glm::radians(50.0f),
+        model = glm::rotate(model, static_cast<float>(timeSnapshot) * glm::radians(50.0f),
                             glm::vec3(0.5f, 1.0f, 0.0f));
         model = glm::scale(model, glm::vec3(1.5f, 1.5f, 1.5f));
         auto viewPos = glm::vec3(0.0f, 0.0f, 6.0f);
@@ -136,6 +149,7 @@ int main(int argc, char **argv) {
         // clear the window
         glClearColor(0.0f, 0.1f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        texture.bind();
 
         buffer.bindVAO();
         glDrawArrays(GL_TRIANGLES, 0, 36);

@@ -11,6 +11,7 @@ uniform mat4 u_projection;
 out vec3 normal;
 out vec3 fragPos;
 out vec3 vertex_color;
+out vec2 fake_uv;
 
 void main() {
     normal = mat3(u_model) * in_normal;
@@ -18,4 +19,5 @@ void main() {
 
     gl_Position = u_projection * u_view * u_model * vec4(in_position, 1.0);
     vertex_color = in_color;
+    fake_uv = abs(in_position.xy);
 }

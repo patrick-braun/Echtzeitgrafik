@@ -26,12 +26,21 @@ public:
                              : ProjectionType::PERSPECTIVE;
     }
 
+    void togglePause() {
+        paused = !paused;
+    }
+
+    [[nodiscard]] bool isPaused() const {
+        return paused;
+    }
+
     [[nodiscard]] ProjectionType getProjectionType() const {
         return projectionType;
     }
 
 private:
     ProjectionType projectionType;
+    bool paused{};
 };
 
 

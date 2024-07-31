@@ -12,16 +12,19 @@ struct PointLight {
 in vec3 normal;
 in vec3 fragPos;
 in vec3 vertex_color;
+in vec2 fake_uv;
 
 uniform PointLight u_light;
 uniform vec3 u_viewPos;
+uniform sampler2D u_img;
 
 out vec4 out_color;
 
 void main() {
     float ambientStr = 0.5;
     vec3 ambientLightColor = vec3(1.0);
-    vec3 objColor = vertex_color;
+    //vec3 objColor = vertex_color;
+    vec3 objColor = texture(u_img, fake_uv).rgb;
     vec3 ambient = ambientStr * ambientLightColor;
 
     vec3 lightColor = u_light.color * u_light.intensity;
@@ -33,7 +36,6 @@ void main() {
     vec3 viewDir = normalize(u_viewPos - fragPos);
     vec3 reflectDir = reflect(-lightDir, norm);
     vec3 spec = specularStr * pow(max(dot(viewDir, reflectDir), 0.0001), 32) * lightColor;
-
 
     float dist = length(u_light.position - fragPos);
     float attenuation = 1.0 / (
