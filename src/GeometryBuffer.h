@@ -21,6 +21,31 @@ public:
         glDeleteBuffers(1, &ebo);
     }
 
+    GeometryBuffer(const GeometryBuffer &other) = delete;
+
+    GeometryBuffer(GeometryBuffer &&other) noexcept
+        : vbo(other.vbo),
+          vao(other.vao),
+          ebo(other.ebo) {
+        other.vbo = 0;
+        other.vao = 0;
+        other.ebo = 0;
+    }
+
+    GeometryBuffer & operator=(const GeometryBuffer &other) = delete;
+
+    GeometryBuffer & operator=(GeometryBuffer &&other) noexcept {
+        if (this == &other)
+            return *this;
+        vbo = other.vbo;
+        vao = other.vao;
+        ebo = other.ebo;
+        other.vbo = 0;
+        other.vao = 0;
+        other.ebo = 0;
+        return *this;
+    }
+
     void setVAOData(
         GLuint index, GLint size,
         GLenum type, GLboolean normalized,

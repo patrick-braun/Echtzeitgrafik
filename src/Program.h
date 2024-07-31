@@ -20,6 +20,23 @@ public:
         glDeleteProgram(glProgram);
     }
 
+    Program(const Program &other) = delete;
+
+    Program(Program &&other) noexcept
+        : glProgram(other.glProgram) {
+        other.glProgram = 0;
+    }
+
+    Program & operator=(const Program &other) = delete;
+
+    Program & operator=(Program &&other) noexcept {
+        if (this == &other)
+            return *this;
+        glProgram = other.glProgram;
+        other.glProgram = 0;
+        return *this;
+    }
+
     void attach(const Shader &shader) const {
         glAttachShader(glProgram, shader.getGlShader());
     }

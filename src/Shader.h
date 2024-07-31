@@ -31,11 +31,20 @@ public:
 
     Shader(const Shader &) = delete;
 
+    Shader(Shader &&other) noexcept
+        : glShader(other.glShader) {
+        other.glShader = 0;
+    }
+
     Shader &operator=(const Shader &) = delete;
 
-    Shader(Shader &&other) = delete;
-
-    Shader &operator=(Shader &&other) = delete;
+    Shader &operator=(Shader &&other) noexcept {
+        if (this == &other)
+            return *this;
+        glShader = other.glShader;
+        other.glShader = 0;
+        return *this;
+    }
 
     virtual ~Shader() {
         glDeleteShader(this->glShader);
