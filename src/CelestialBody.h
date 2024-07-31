@@ -15,6 +15,7 @@ struct CelestialBodyInfo {
     double orbitDegreesPerHour;
     double distanceFromParent;
     float scaleFactor = 1.0;
+    bool selfEmitting = false;
 };
 
 class CelestialBody {
@@ -52,6 +53,10 @@ public:
         return model;
     }
 
+    [[nodiscard]] bool getSelfEmitting() const {
+        return this->info.selfEmitting;
+    }
+
     ~CelestialBody() = default;
 
     CelestialBody(const CelestialBody &other) = delete;
@@ -62,9 +67,9 @@ public:
           texture(std::move(other.texture)) {
     }
 
-    CelestialBody & operator=(const CelestialBody &other) = delete;
+    CelestialBody &operator=(const CelestialBody &other) = delete;
 
-    CelestialBody & operator=(CelestialBody &&other) noexcept {
+    CelestialBody &operator=(CelestialBody &&other) noexcept {
         if (this == &other)
             return *this;
         info = other.info;

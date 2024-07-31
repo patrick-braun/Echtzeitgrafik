@@ -86,15 +86,6 @@ int main(int argc, char **argv) {
     }
 
 
-    GeometryBuffer buffer;
-    buffer.setVBOData(sizeof(cube), cube, GL_STATIC_DRAW);
-    /* Position attribute */
-    buffer.setVAOData(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), nullptr);
-    /* Color attribute */
-    buffer.setVAOData(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), reinterpret_cast<GLvoid *>(3 * sizeof(GLfloat)));
-    /* Normal attribute */
-    buffer.setVAOData(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), reinterpret_cast<GLvoid *>(6 * sizeof(GLfloat)));
-
     program.use();
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glEnable(GL_DEPTH_TEST);
@@ -114,8 +105,9 @@ int main(int argc, char **argv) {
 
     glm::mat4 perspective = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 1000.0f);
     glm::mat4 orthographic = glm::ortho(-4.0f, 4.0f, -3.0f, 3.0f, 0.1f, 1000.0f);
-    auto viewPos = glm::vec3(0.0f, 0.0f, 6.0f);
+    auto viewPos = glm::vec3(0.0f, 0.0f, 20.0f);
     auto view = translate(glm::mat4(1.0f), -viewPos);
+    view = glm::rotate(view, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
     double timeSnapshot = 0;
     double prevTimeSnapshot = glfwGetTime();
@@ -150,17 +142,17 @@ int main(int argc, char **argv) {
         glClearColor(0.0f, 0.1f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        for (int i = 0; i < solarSystem.getBodies()->size(); ++i) {
-            CelestialBody *body = &(*solarSystem.getBodies())[i];
-            auto model = body->getTransformationMatrix(simTime);
+        for (int i = 0; i < solarSystem.getNumBodies(); ++i) {
+            auto model = solarSystem.getBody(i)->getTransformationMatrix(simTime);
             try {
                 program.setUniform("u_model", model);
+                program.setUniform("u_selfEmitting", solarSystem.getBody(i)->getSelfEmitting());
             } catch (const std::runtime_error &e) {
                 std::cerr << e.what() << std::endl;
                 glfwTerminate();
                 exit(1);
             }
-            body->render();
+            solarSystem.getBody(i)->render();
         }
 
 
@@ -175,7 +167,6 @@ int main(int argc, char **argv) {
         simTime += frameDelta * 24 * settings.getSpeed();
         fpsMeasureThreshold += frameDelta;
         if (fpsMeasureThreshold >= 1.0) {
-            std::cout << simTime << " " << frameDelta << std::endl;
             double fps = static_cast<double>(frames) / fpsMeasureThreshold;
 
             std::ostringstream ss;

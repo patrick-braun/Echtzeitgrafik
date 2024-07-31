@@ -17,13 +17,19 @@ in vec2 uv;
 uniform PointLight u_light;
 uniform vec3 u_viewPos;
 uniform sampler2D u_img;
+uniform bool u_selfEmitting;
 
 out vec4 out_color;
 
 void main() {
+    vec3 objColor = texture(u_img, uv).rgb;
+    if (u_selfEmitting) {
+        out_color = vec4(objColor, 1.0);
+        return;
+    }
+
     float ambientStr = 0.5;
     vec3 ambientLightColor = vec3(1.0);
-    vec3 objColor = texture(u_img, uv).rgb;
     vec3 ambient = ambientStr * ambientLightColor;
 
     vec3 lightColor = u_light.color * u_light.intensity;

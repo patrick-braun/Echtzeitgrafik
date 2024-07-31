@@ -49,7 +49,7 @@ public:
 private:
     ProjectionType projectionType;
     bool paused = false;
-    int speed = 1;
+    int speed = 7;
 };
 
 
