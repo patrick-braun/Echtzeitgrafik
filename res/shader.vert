@@ -19,5 +19,5 @@ void main() {
 
     gl_Position = u_projection * u_view * u_model * vec4(in_position, 1.0);
     vertex_color = in_color;
-    fake_uv = abs(in_position.xy);
+    fake_uv = max(in_position.xy, 0.0);
 }
