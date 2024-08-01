@@ -99,10 +99,7 @@ int main(int argc, char **argv) {
     program.use();
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glEnable(GL_DEPTH_TEST);
-
     glfwSwapInterval(1); // Enable vsync
-
-
     glfwSetWindowUserPointer(window, &settings);
     setupKeybinds(window);
 
@@ -118,12 +115,12 @@ int main(int argc, char **argv) {
     view = glm::rotate(view, glm::radians(40.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     view = glm::rotate(view, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
-    double timeSnapshot = 0;
-    double prevTimeSnapshot = glfwGetTime();
+    double timeSnapshot = glfwGetTime();
+    double prevTimeSnapshot;
     while (glfwWindowShouldClose(window) == 0) {
         program.use();
-
-        glm::mat4 screenSpaceTransform = settings.getProjection() * view;
+        glClearColor(0.0f, 0.1f, 0.2f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         try {
             program.setUniform("u_viewPos", viewPos);
@@ -139,10 +136,7 @@ int main(int argc, char **argv) {
             exit(1);
         }
 
-        // clear the window
-        glClearColor(0.0f, 0.1f, 0.2f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+        glm::mat4 screenSpaceTransform = settings.getProjection() * view;
         for (int i = 0; i < solarSystem.getNumBodies(); ++i) {
             auto model = solarSystem.getBody(i)->getTransformationMatrix(simTime);
             try {
@@ -157,26 +151,22 @@ int main(int argc, char **argv) {
             solarSystem.getBody(i)->render();
         }
 
-        // swap buffer
         glfwSwapBuffers(window);
-
-        // process user events
         glfwPollEvents();
 
         prevTimeSnapshot = timeSnapshot;
         timeSnapshot = glfwGetTime();
-        frames++;
         double frameDelta = timeSnapshot - prevTimeSnapshot;
         if (!settings.isPaused()) {
             simTime += frameDelta * 24 * settings.getSpeed();
         }
+        frames++;
         fpsMeasureThreshold += frameDelta;
         if (fpsMeasureThreshold >= 1.0) {
             double fps = static_cast<double>(frames) / fpsMeasureThreshold;
 
             std::ostringstream ss;
             ss << "Echtzeitgrafik - FPS: " << fps;
-
             glfwSetWindowTitle(window, ss.str().c_str());
 
             frames = 0;
