@@ -68,7 +68,7 @@ private:
     bool paused = false;
     int speed = 7;
     float fieldOfView = 45.0f;
-    float aspectRatio = 80.f / 6.0f;
+    float aspectRatio = 8.0f / 6.0f;
     glm::mat4 perspective = glm::perspective(glm::radians(fieldOfView), 800.0f / 600.0f, 0.1f, 1000.0f);
     glm::mat4 orthographic = glm::ortho(-4.0f, 4.0f, -3.0f, 3.0f, 0.1f, 1000.0f);
 
