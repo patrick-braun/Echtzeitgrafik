@@ -68,7 +68,7 @@ void registerDebugHandler() {
     }
 }
 
-void framebuffer_size_callback(GLFWwindow* window, const int width, const int height)
+void framebufferSizeCallback(GLFWwindow* window, const int width, const int height)
 {
     const auto settings = static_cast<Settings *>(glfwGetWindowUserPointer(window));
     glViewport(0, 0, width, height);
@@ -80,7 +80,7 @@ int main(int argc, char **argv) {
     registerDebugHandler();
     GLFWwindow *window = initAndCreateWindow();
     glViewport(0, 0, 800, 600);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
     auto settings = Settings();
 
     const std::string vertexShaderSource = readResToString("shader.vert");
