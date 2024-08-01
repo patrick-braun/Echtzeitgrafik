@@ -56,9 +56,16 @@ public:
         const float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
         perspective = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 1000.0f);
 
-        const float worldWidth = static_cast<float>(width) / 200;
-        const float worldHeight = static_cast<float>(height) / 200;
-        orthographic = glm::ortho(-worldWidth, worldWidth, -worldHeight, worldHeight, 0.1f, 1000.0f);
+        float xSpan = 8;
+        float ySpan = 8;
+
+        if (aspectRatio > 1){
+            xSpan *= aspectRatio;
+        }
+        else{
+            ySpan = ySpan / aspectRatio;
+        }
+        orthographic = glm::ortho(-xSpan, xSpan, -ySpan, ySpan, 0.1f, 1000.0f);
     }
 
 private:

@@ -161,7 +161,6 @@ int main(int argc, char **argv) {
             solarSystem.getBody(i)->render();
         }
 
-
         // swap buffer
         glfwSwapBuffers(window);
 
