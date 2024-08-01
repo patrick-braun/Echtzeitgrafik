@@ -121,10 +121,6 @@ int main(int argc, char **argv) {
     double timeSnapshot = 0;
     double prevTimeSnapshot = glfwGetTime();
     while (glfwWindowShouldClose(window) == 0) {
-        if (!settings.isPaused()) {
-            prevTimeSnapshot = timeSnapshot;
-            timeSnapshot = glfwGetTime();
-        }
         program.use();
 
         glm::mat4 screenSpaceTransform = settings.getProjection() * view;
@@ -167,9 +163,13 @@ int main(int argc, char **argv) {
         // process user events
         glfwPollEvents();
 
+        prevTimeSnapshot = timeSnapshot;
+        timeSnapshot = glfwGetTime();
         frames++;
         double frameDelta = timeSnapshot - prevTimeSnapshot;
-        simTime += frameDelta * 24 * settings.getSpeed();
+        if (!settings.isPaused()) {
+            simTime += frameDelta * 24 * settings.getSpeed();
+        }
         fpsMeasureThreshold += frameDelta;
         if (fpsMeasureThreshold >= 1.0) {
             double fps = static_cast<double>(frames) / fpsMeasureThreshold;
