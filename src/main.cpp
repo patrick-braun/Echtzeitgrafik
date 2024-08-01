@@ -42,6 +42,12 @@ void setupKeybinds(GLFWwindow *window) {
         if (key == GLFW_KEY_LEFT && action == GLFW_PRESS) {
             settings->setSpeed(std::max(settings->getSpeed() / 2, 1));
         }
+        if (key == GLFW_KEY_W && action == GLFW_PRESS) {
+            settings->changeFieldOfView(-5.0f);
+        }
+        if (key == GLFW_KEY_S && action == GLFW_PRESS) {
+            settings->changeFieldOfView(5.0f);
+        }
     };
     glfwSetKeyCallback(window, callback);
 }
@@ -64,9 +70,9 @@ void registerDebugHandler() {
 
 void framebuffer_size_callback(GLFWwindow* window, const int width, const int height)
 {
-    auto settings = static_cast<Settings *>(glfwGetWindowUserPointer(window));
+    const auto settings = static_cast<Settings *>(glfwGetWindowUserPointer(window));
     glViewport(0, 0, width, height);
-    settings->updateProjection(width, height);
+    settings->setAspectRatio(static_cast<float>(width) / static_cast<float>(height));
 }
 
 

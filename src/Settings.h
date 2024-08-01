@@ -52,12 +52,31 @@ public:
                              : orthographic;
     }
 
-    void updateProjection(const int width, const int height) {
-        const float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
-        perspective = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 1000.0f);
+    void setAspectRatio(const float newAspectRatio) {
+        aspectRatio = newAspectRatio;
+        updateProjection();
+    }
 
-        float xSpan = 8;
-        float ySpan = 8;
+    void changeFieldOfView(const float change) {
+        fieldOfView = fieldOfView + change;
+        fieldOfView = std::clamp(fieldOfView, 10.0f, 120.0f);
+        updateProjection();
+    }
+
+private:
+    ProjectionType projectionType;
+    bool paused = false;
+    int speed = 7;
+    float fieldOfView = 45.0f;
+    float aspectRatio = 80.f / 6.0f;
+    glm::mat4 perspective = glm::perspective(glm::radians(fieldOfView), 800.0f / 600.0f, 0.1f, 1000.0f);
+    glm::mat4 orthographic = glm::ortho(-4.0f, 4.0f, -3.0f, 3.0f, 0.1f, 1000.0f);
+
+    void updateProjection() {
+        perspective = glm::perspective(glm::radians(fieldOfView), aspectRatio, 0.1f, 1000.0f);
+
+        float xSpan = 8 * (fieldOfView / 45.0f);
+        float ySpan = 8 * (fieldOfView / 45.0f);
 
         if (aspectRatio > 1){
             xSpan *= aspectRatio;
@@ -67,13 +86,6 @@ public:
         }
         orthographic = glm::ortho(-xSpan, xSpan, -ySpan, ySpan, 0.1f, 1000.0f);
     }
-
-private:
-    ProjectionType projectionType;
-    bool paused = false;
-    int speed = 7;
-    glm::mat4 perspective = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 1000.0f);
-    glm::mat4 orthographic = glm::ortho(-4.0f, 4.0f, -3.0f, 3.0f, 0.1f, 1000.0f);
 };
 
 
