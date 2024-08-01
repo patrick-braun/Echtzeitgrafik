@@ -46,13 +46,19 @@ public:
         this->speed = speed;
     }
 
-    [[nodiscard]] glm::mat4 getPerspective() const {
-        return perspective;
+    [[nodiscard]] glm::mat4 getProjection() const {
+        return projectionType == ProjectionType::PERSPECTIVE
+                             ? perspective
+                             : orthographic;
     }
 
-    void setPerspective(const int width, const int height) {
+    void updateProjection(const int width, const int height) {
         const float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
         perspective = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 1000.0f);
+
+        const float worldWidth = static_cast<float>(width) / 200;
+        const float worldHeight = static_cast<float>(height) / 200;
+        orthographic = glm::ortho(-worldWidth, worldWidth, -worldHeight, worldHeight, 0.1f, 1000.0f);
     }
 
 private:
@@ -60,6 +66,7 @@ private:
     bool paused = false;
     int speed = 7;
     glm::mat4 perspective = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 1000.0f);
+    glm::mat4 orthographic = glm::ortho(-4.0f, 4.0f, -3.0f, 3.0f, 0.1f, 1000.0f);
 };
 
 

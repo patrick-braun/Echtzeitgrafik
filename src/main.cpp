@@ -66,7 +66,7 @@ void registerDebugHandler() {
 void framebuffer_size_callback(GLFWwindow* window, const int width, const int height)
 {
     glViewport(0, 0, width, height);
-    settings.setPerspective(width, height);
+    settings.updateProjection(width, height);
 }
 
 
@@ -112,10 +112,10 @@ int main(int argc, char **argv) {
     double fpsMeasureThreshold = 0;
     double simTime = 0;
 
-    glm::mat4 orthographic = glm::ortho(-4.0f, 4.0f, -3.0f, 3.0f, 0.1f, 1000.0f);
     auto viewPos = glm::vec3(0.0f, 0.0f, 20.0f);
     auto view = translate(glm::mat4(1.0f), -viewPos);
-    view = glm::rotate(view, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    view = glm::rotate(view, glm::radians(40.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    view = glm::rotate(view, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
     double timeSnapshot = 0;
     double prevTimeSnapshot = glfwGetTime();
@@ -126,8 +126,6 @@ int main(int argc, char **argv) {
         }
         program.use();
 
-        glm::mat4 perspective = settings.getPerspective();
-
         try {
             program.setUniform("u_view", view);
             program.setUniform("u_viewPos", viewPos);
@@ -137,11 +135,7 @@ int main(int argc, char **argv) {
             program.setUniform("u_light.constant", l.getAttenuation().constant);
             program.setUniform("u_light.linear", l.getAttenuation().linear);
             program.setUniform("u_light.quadratic", l.getAttenuation().quadratic);
-            if (settings.getProjectionType() == ProjectionType::PERSPECTIVE) {
-                program.setUniform("u_projection", perspective);
-            } else {
-                program.setUniform("u_projection", orthographic);
-            }
+            program.setUniform("u_projection", settings.getProjection());
         } catch (const std::runtime_error &e) {
             std::cerr << e.what() << std::endl;
             glfwTerminate();
