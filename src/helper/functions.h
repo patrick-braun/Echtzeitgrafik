@@ -24,7 +24,7 @@ inline GLFWwindow* initAndCreateWindow(int width = 800, int height = 600, bool d
     {
         std::cerr << "GLFW failed to initiate." << std::endl;
     }
-    glfwWindowHint(GLFW_RESIZABLE, false);
+    glfwWindowHint(GLFW_RESIZABLE, true);
     glfwWindowHint(GLFW_SAMPLES, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);

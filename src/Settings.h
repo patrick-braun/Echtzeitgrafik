@@ -46,10 +46,20 @@ public:
         this->speed = speed;
     }
 
+    [[nodiscard]] glm::mat4 getPerspective() const {
+        return perspective;
+    }
+
+    void setPerspective(const int width, const int height) {
+        const float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+        perspective = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 1000.0f);
+    }
+
 private:
     ProjectionType projectionType;
     bool paused = false;
     int speed = 7;
+    glm::mat4 perspective = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 1000.0f);
 };
 
 

@@ -23,6 +23,8 @@
 
 #include <glm/gtx/string_cast.hpp>
 
+auto settings = Settings();
+
 void setupKeybinds(GLFWwindow *window) {
     auto callback = [](GLFWwindow *window, int key, int scancode, int action, int mods) {
         auto settings = static_cast<Settings *>(glfwGetWindowUserPointer(window));
@@ -61,11 +63,18 @@ void registerDebugHandler() {
     }
 }
 
+void framebuffer_size_callback(GLFWwindow* window, const int width, const int height)
+{
+    glViewport(0, 0, width, height);
+    settings.setPerspective(width, height);
+}
+
 
 int main(int argc, char **argv) {
     registerDebugHandler();
     GLFWwindow *window = initAndCreateWindow();
     glViewport(0, 0, 800, 600);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     const std::string vertexShaderSource = readResToString("shader.vert");
     const std::string fragmentShaderSource = readResToString("shader.frag");
@@ -92,7 +101,7 @@ int main(int argc, char **argv) {
 
     glfwSwapInterval(1); // Enable vsync
 
-    auto settings = Settings();
+
     glfwSetWindowUserPointer(window, &settings);
     setupKeybinds(window);
 
@@ -103,7 +112,6 @@ int main(int argc, char **argv) {
     double fpsMeasureThreshold = 0;
     double simTime = 0;
 
-    glm::mat4 perspective = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 1000.0f);
     glm::mat4 orthographic = glm::ortho(-4.0f, 4.0f, -3.0f, 3.0f, 0.1f, 1000.0f);
     auto viewPos = glm::vec3(0.0f, 0.0f, 20.0f);
     auto view = translate(glm::mat4(1.0f), -viewPos);
@@ -117,6 +125,8 @@ int main(int argc, char **argv) {
             timeSnapshot = glfwGetTime();
         }
         program.use();
+
+        glm::mat4 perspective = settings.getPerspective();
 
         try {
             program.setUniform("u_view", view);
