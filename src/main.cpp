@@ -23,7 +23,6 @@
 
 #include <glm/gtx/string_cast.hpp>
 
-auto settings = Settings();
 
 void setupKeybinds(GLFWwindow *window) {
     auto callback = [](GLFWwindow *window, int key, int scancode, int action, int mods) {
@@ -65,8 +64,9 @@ void registerDebugHandler() {
 
 void framebuffer_size_callback(GLFWwindow* window, const int width, const int height)
 {
+    auto settings = static_cast<Settings *>(glfwGetWindowUserPointer(window));
     glViewport(0, 0, width, height);
-    settings.updateProjection(width, height);
+    settings->updateProjection(width, height);
 }
 
 
@@ -75,6 +75,7 @@ int main(int argc, char **argv) {
     GLFWwindow *window = initAndCreateWindow();
     glViewport(0, 0, 800, 600);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    auto settings = Settings();
 
     const std::string vertexShaderSource = readResToString("shader.vert");
     const std::string fragmentShaderSource = readResToString("shader.frag");
@@ -126,8 +127,9 @@ int main(int argc, char **argv) {
         }
         program.use();
 
+        glm::mat4 screenSpaceTransform = settings.getProjection() * view;
+
         try {
-            program.setUniform("u_view", view);
             program.setUniform("u_viewPos", viewPos);
             program.setUniform("u_light.position", l.getPosition());
             program.setUniform("u_light.color", l.getColor());
@@ -135,7 +137,6 @@ int main(int argc, char **argv) {
             program.setUniform("u_light.constant", l.getAttenuation().constant);
             program.setUniform("u_light.linear", l.getAttenuation().linear);
             program.setUniform("u_light.quadratic", l.getAttenuation().quadratic);
-            program.setUniform("u_projection", settings.getProjection());
         } catch (const std::runtime_error &e) {
             std::cerr << e.what() << std::endl;
             glfwTerminate();
@@ -150,6 +151,7 @@ int main(int argc, char **argv) {
             auto model = solarSystem.getBody(i)->getTransformationMatrix(simTime);
             try {
                 program.setUniform("u_model", model);
+                program.setUniform("u_screenSpaceTransform", screenSpaceTransform * model);
                 program.setUniform("u_selfEmitting", solarSystem.getBody(i)->getSelfEmitting());
             } catch (const std::runtime_error &e) {
                 std::cerr << e.what() << std::endl;
