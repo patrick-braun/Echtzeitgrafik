@@ -102,7 +102,22 @@ void registerDebugHandler() {
 void registerMouseHandler(GLFWwindow *window) {
     const auto callback = [](GLFWwindow *window, double xPos, double yPos) {
         auto settings = static_cast<Settings *>(glfwGetWindowUserPointer(window));
-        settings->updateMouse(xPos, yPos);
+        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+            if (!settings->getDragging()) {
+                settings->setMousePosBeforeDrag({xPos, yPos});
+            }
+            settings->setDragging(true);
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            settings->updateMouse(xPos, yPos);
+        }
+        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE) {
+            if (settings->getDragging()) {
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                glfwSetCursorPos(window, settings->getMousePosBeforeDrag().x, settings->getMousePosBeforeDrag().y);
+                settings->setLastMousePos(0, 0);
+            }
+            settings->setDragging(false);
+        }
     };
     glfwSetCursorPosCallback(window, callback);
 }
@@ -125,7 +140,6 @@ void framebufferSizeCallback(GLFWwindow *window, const int width, const int heig
 int main(int argc, char **argv) {
     registerDebugHandler();
     GLFWwindow *window = initAndCreateWindow(DEFAULT_WIDTH, DEFAULT_HEIGHT);
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glViewport(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT);
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
     registerMouseHandler(window);

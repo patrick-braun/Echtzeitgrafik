@@ -67,10 +67,28 @@ public:
         cam.setAngles(offset);
     }
 
+    [[nodiscard]] glm::dvec2 getMousePosBeforeDrag() const {
+        return mousePosBeforeDrag;
+    }
+
+    void setMousePosBeforeDrag(const glm::dvec2 &mousePosBeforeDrag) {
+        this->mousePosBeforeDrag = mousePosBeforeDrag;
+    }
+
+    [[nodiscard]] bool getDragging() const {
+        return dragging;
+    }
+
+    void setDragging(bool dragging) {
+        this->dragging = dragging;
+    }
+
 private:
     Camera cam;
     SolarSystem *solarSystem;
     glm::dvec2 lastMousePos = {0.0, 0.0};
+    glm::dvec2 mousePosBeforeDrag = {0.0, 0.0};
+    bool dragging = false;
     bool paused = false;
     float speed = 1;
 };
