@@ -16,6 +16,7 @@ class Texture {
 public:
     explicit Texture(const std::string &textureName) {
         int width, height, nrChannels;
+        stbi_set_flip_vertically_on_load(true);
         std::filesystem::path path(ROOT_DIR "res/textures/" + textureName);
         unsigned char *imageData = stbi_load(path.string().c_str(), &width, &height, &nrChannels, 0);
         if (!imageData) {

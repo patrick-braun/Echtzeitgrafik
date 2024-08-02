@@ -45,3 +45,12 @@ void Program::setUniform(const std::string &name, const glm::mat4 &value) const 
     }
     glUniformMatrix4fv(loc, 1, GL_FALSE, value_ptr(value));
 }
+
+void Program::setUniform(const std::string &name, const PointLight &pointLight) const {
+    setUniform(name + ".position", pointLight.getPosition());
+    setUniform(name + ".color", pointLight.getColor());
+    setUniform(name + ".intensity", pointLight.getIntensity());
+    setUniform(name + ".constant", pointLight.getAttenuation().constant);
+    setUniform(name + ".linear", pointLight.getAttenuation().linear);
+    setUniform(name + ".quadratic", pointLight.getAttenuation().quadratic);
+}

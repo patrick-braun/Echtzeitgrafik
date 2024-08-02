@@ -63,6 +63,8 @@ public:
 
     void setUniform(const std::string &name, const glm::mat4 &value) const;
 
+    void setUniform(const std::string &name, const PointLight &pointLight) const;
+
 private:
     GLuint glProgram;
 };

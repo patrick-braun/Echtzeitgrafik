@@ -40,10 +40,10 @@ void setupKeybinds(GLFWwindow *window) {
             settings->togglePause();
         }
         if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) {
-            settings->setSpeed(settings->getSpeed() * 2);
+            settings->doubleSpeed();
         }
         if (key == GLFW_KEY_LEFT && action == GLFW_PRESS) {
-            settings->setSpeed(std::max(settings->getSpeed() / 2, 1));
+            settings->halfSpeed();
         }
         if (key == GLFW_KEY_W && action == GLFW_PRESS) {
             settings->changeFieldOfView(-5.0f);
@@ -122,10 +122,10 @@ int main(int argc, char **argv) {
     auto viewPos = glm::vec3(0.0f, 0.0f, 20.0f);
     auto view = translate(glm::mat4(1.0f), -viewPos);
     view = glm::rotate(view, glm::radians(40.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    view = glm::rotate(view, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
     double timeSnapshot = glfwGetTime();
     double prevTimeSnapshot;
+
     while (glfwWindowShouldClose(window) == 0) {
         program.use();
         glClearColor(0.0f, 0.1f, 0.2f, 1.0f);
@@ -133,12 +133,7 @@ int main(int argc, char **argv) {
 
         try {
             program.setUniform("u_viewPos", viewPos);
-            program.setUniform("u_light.position", l.getPosition());
-            program.setUniform("u_light.color", l.getColor());
-            program.setUniform("u_light.intensity", l.getIntensity());
-            program.setUniform("u_light.constant", l.getAttenuation().constant);
-            program.setUniform("u_light.linear", l.getAttenuation().linear);
-            program.setUniform("u_light.quadratic", l.getAttenuation().quadratic);
+            program.setUniform("u_light", l);
         } catch (const std::runtime_error &e) {
             std::cerr << e.what() << std::endl;
             glfwTerminate();

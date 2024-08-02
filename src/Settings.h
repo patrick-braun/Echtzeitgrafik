@@ -53,6 +53,20 @@ public:
         this->speed = speed;
     }
 
+    void doubleSpeed() {
+        speed *= 2;
+        speed = std::clamp(speed, 1, 2048);
+    }
+
+    void halfSpeed() {
+        speed /= 2;
+        speed = std::clamp(speed, 1, 2048);
+    }
+
+    [[nodiscard]] float getFieldOfView() const {
+        return fieldOfView;
+    }
+
     [[nodiscard]] glm::mat4 getProjection() const {
         return projectionType == ProjectionType::PERSPECTIVE
                    ? perspective

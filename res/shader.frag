@@ -37,7 +37,7 @@ void main() {
     vec3 lightDir = normalize(u_light.position - fragPos);
     vec3 diffuse = max(dot(norm, lightDir), 0.0) * lightColor;
 
-    float specularStr = 0.3;
+    float specularStr = 0.15;
     vec3 viewDir = normalize(u_viewPos - fragPos);
     vec3 reflectDir = reflect(-lightDir, norm);
     vec3 spec = specularStr * pow(max(dot(viewDir, reflectDir), 0.0001), 32) * lightColor;
