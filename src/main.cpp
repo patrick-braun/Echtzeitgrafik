@@ -110,7 +110,7 @@ void registerMouseHandler(GLFWwindow *window) {
 void registerScrollHandler(GLFWwindow *window) {
     const auto callback = [](GLFWwindow *window, double xOffset, double yOffset) {
         auto settings = static_cast<Settings *>(glfwGetWindowUserPointer(window));
-        settings->getCamera()->changeFieldOfView(static_cast<float>(yOffset));
+        settings->getCamera()->changeFieldOfView(static_cast<float>(-yOffset * 1.5));
     };
     glfwSetScrollCallback(window, callback);
 }
