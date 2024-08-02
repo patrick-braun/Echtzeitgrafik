@@ -44,8 +44,8 @@ public:
         return &cam;
     }
 
-    void setFocusedBody(int idx) {
-        auto body = solarSystem->getBody(idx);
+    void setFocusedBody(const int idx) {
+        const auto body = solarSystem->getBody(idx);
         cam.setFocusedBody(body);
     }
 

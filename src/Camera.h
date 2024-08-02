@@ -56,16 +56,16 @@ public:
         return angles;
     }
 
-    [[nodiscard]] glm::mat4 calcView(double simTime) {
+    [[nodiscard]] glm::mat4 calcView(const double simTime) const {
         auto view = translate(glm::mat4(1.0f), -pos);
-        view *= focusedBody->getPosition(simTime);
         view = rotate(view, glm::radians(angles.y), glm::vec3(1.0f, 0.0f, 0.0f));
         view = rotate(view, glm::radians(angles.x), glm::vec3(0.0f, 1.0f, 0.0f));
+        view = translate(view, -focusedBody->getPosition(simTime));
 
         return view;
     }
 
-    glm::vec3 getPos() const {
+    [[nodiscard]] glm::vec3 getPos() const {
         return pos;
     }
 
