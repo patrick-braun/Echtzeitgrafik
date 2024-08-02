@@ -87,7 +87,7 @@ public:
 
     void changeFieldOfView(const float change) {
         cam.fov = cam.fov + change;
-        cam.fov = std::clamp(cam.fov, 10.0f, 120.0f);
+        cam.fov = std::clamp(cam.fov, 5.0f, 120.0f);
         updateProjection();
     }
 

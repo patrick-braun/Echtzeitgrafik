@@ -28,7 +28,7 @@ void main() {
         return;
     }
 
-    float ambientStr = 0.5;
+    float ambientStr = 0.4;
     vec3 ambientLightColor = vec3(1.0);
     vec3 ambient = ambientStr * ambientLightColor;
 
@@ -40,7 +40,7 @@ void main() {
     float specularStr = 0.15;
     vec3 viewDir = normalize(u_viewPos - fragPos);
     vec3 reflectDir = reflect(-lightDir, norm);
-    vec3 spec = specularStr * pow(max(dot(viewDir, reflectDir), 0.0001), 32) * lightColor;
+    vec3 spec = specularStr * max(dot(norm, lightDir), 0.0) * pow(max(dot(viewDir, reflectDir), 0.0001), 32) * lightColor;
 
     float dist = length(u_light.position - fragPos);
     float attenuation = 1.0 / (
