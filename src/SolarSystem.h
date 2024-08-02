@@ -4,7 +4,6 @@
 
 #ifndef SOLARSYSTEM_H
 #define SOLARSYSTEM_H
-#include <functional>
 #include <iostream>
 #include <vector>
 #include <assimp/Importer.hpp>
@@ -17,10 +16,19 @@
 
 class SolarSystem {
 public:
+    SolarSystem() = default;
+
     explicit SolarSystem(const std::string &meshName) {
         loadMesh(meshName);
         loadBodies();
     }
+
+    void load(const std::string &meshName) {
+        loadMesh(meshName);
+        loadBodies();
+    }
+
+    ~SolarSystem() = default;
 
     [[nodiscard]] PointLight getLight() const {
         return light;
@@ -36,7 +44,7 @@ public:
 
 private:
     GeometryBuffer buf;
-    PointLight light;
+    PointLight light{};
     std::vector<CelestialBody> bodies;
 
     void loadBodies() {
@@ -49,6 +57,7 @@ private:
             {1.0, 0.045, 0.0075}
         );
 
+        // rotations and scales are calculated with the supplied project task information and some internet research
         CelestialBodyInfo mercuryInfo{-0.255754475703324, -0.170512674775491, 1, 0.15};
         bodies.emplace_back(mercuryInfo, &buf, "2k_mercury.jpg");
 

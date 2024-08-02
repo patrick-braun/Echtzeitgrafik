@@ -26,10 +26,65 @@ public:
         updateProjection();
     }
 
+    Camera(const Camera &other)
+        : projectionType(other.projectionType),
+          perspective(other.perspective),
+          orthographic(other.orthographic),
+          pos(other.pos),
+          angles(other.angles),
+          fov(other.fov),
+          aspectRatio(other.aspectRatio),
+          lastMousePos(other.lastMousePos),
+          focusedBody(other.focusedBody) {
+    }
+
+    Camera(Camera &&other) noexcept
+        : projectionType(other.projectionType),
+          perspective(std::move(other.perspective)),
+          orthographic(std::move(other.orthographic)),
+          pos(std::move(other.pos)),
+          angles(std::move(other.angles)),
+          fov(other.fov),
+          aspectRatio(other.aspectRatio),
+          lastMousePos(std::move(other.lastMousePos)),
+          focusedBody(other.focusedBody) {
+    }
+
+    Camera &operator=(const Camera &other) {
+        if (this == &other)
+            return *this;
+        projectionType = other.projectionType;
+        perspective = other.perspective;
+        orthographic = other.orthographic;
+        pos = other.pos;
+        angles = other.angles;
+        fov = other.fov;
+        aspectRatio = other.aspectRatio;
+        lastMousePos = other.lastMousePos;
+        focusedBody = other.focusedBody;
+        return *this;
+    }
+
+    Camera &operator=(Camera &&other) noexcept {
+        if (this == &other)
+            return *this;
+        projectionType = other.projectionType;
+        perspective = std::move(other.perspective);
+        orthographic = std::move(other.orthographic);
+        pos = std::move(other.pos);
+        angles = std::move(other.angles);
+        fov = other.fov;
+        aspectRatio = other.aspectRatio;
+        lastMousePos = std::move(other.lastMousePos);
+        focusedBody = other.focusedBody;
+        return *this;
+    }
+
+    ~Camera() = default;
+
     [[nodiscard]] ProjectionType getProjectionType() const {
         return projectionType;
     }
-
 
     [[nodiscard]] float getFieldOfView() const {
         return fov;
@@ -101,7 +156,7 @@ private:
     float fov;
     float aspectRatio;
     glm::dvec2 lastMousePos{};
-    CelestialBody *focusedBody;
+    const CelestialBody *focusedBody;
 
     void updateProjection() {
         perspective = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 1000.0f);

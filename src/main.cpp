@@ -8,10 +8,8 @@
 #include <GL/glew.h> // has to be included first!
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include <ft2build.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <Shader.h>
-#include <GeometryBuffer.h>
 #include <Program.h>
 
 #include "PointLight.h"
@@ -19,7 +17,6 @@
 #include "SolarSystem.h"
 #include "Texture.h"
 #include "helper/functions.h"
-#include "helper/data.h"
 
 #include <glm/gtx/string_cast.hpp>
 
@@ -170,7 +167,16 @@ int main(int argc, char **argv) {
     glfwSwapInterval(1); // Enable vsync
 
 
-    SolarSystem solarSystem("sphere.obj");
+    SolarSystem solarSystem;
+
+    try {
+        solarSystem.load("sphere.obj");
+    } catch (const std::runtime_error &e) {
+        std::cerr << e.what() << std::endl;
+        glfwTerminate();
+        exit(1);
+    }
+
     Camera camera{
         glm::vec3(0.0, 0.0, 20.0),
         glm::fvec2(40.0, 0.0),

@@ -49,10 +49,6 @@ public:
         glUseProgram(glProgram);
     }
 
-    [[nodiscard]] GLuint getGlProgram() const {
-        return glProgram;
-    }
-
     void setUniform(const std::string &name, int value) const;
 
     void setUniform(const std::string &name, float value) const;

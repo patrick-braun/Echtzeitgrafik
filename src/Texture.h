@@ -20,7 +20,8 @@ public:
         std::filesystem::path path(ROOT_DIR "res/textures/" + textureName);
         unsigned char *imageData = stbi_load(path.string().c_str(), &width, &height, &nrChannels, 0);
         if (!imageData) {
-            std::cerr << "Failed to load texture!" << std::endl;
+            stbi_image_free(imageData);
+            throw std::runtime_error("Failed to load texture at" + path.string());
         }
         glGenTextures(1, &glTexture);
         glBindTexture(GL_TEXTURE_2D, glTexture);
