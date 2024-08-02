@@ -23,7 +23,6 @@ public:
           fov(fov),
           aspectRatio(aspect_ratio),
           focusedBody(focused_body) {
-        updateView();
         updateProjection();
     }
 
@@ -57,8 +56,12 @@ public:
         return angles;
     }
 
+    [[nodiscard]] glm::mat4 calcView(double simTime) {
+        auto view = translate(glm::mat4(1.0f), -pos);
+        view *= focusedBody->getPosition(simTime);
+        view = rotate(view, glm::radians(angles.y), glm::vec3(1.0f, 0.0f, 0.0f));
+        view = rotate(view, glm::radians(angles.x), glm::vec3(0.0f, 1.0f, 0.0f));
 
-    [[nodiscard]] glm::mat4 getView() const {
         return view;
     }
 
@@ -68,13 +71,11 @@ public:
 
     void setPos(const glm::vec3 &pos) {
         this->pos = pos;
-        updateView();
     }
 
     void setAngles(const glm::fvec2 &angles) {
         this->angles = angles;
         this->angles.y = std::clamp(angles.y, -89.0f, 89.0f);
-        updateView();
     }
 
     void setProjectionType(ProjectionType projectionType) {
@@ -87,11 +88,14 @@ public:
                              : ProjectionType::PERSPECTIVE;
     }
 
+    void setFocusedBody(CelestialBody *focusedBody) {
+        this->focusedBody = focusedBody;
+    }
+
 private:
     ProjectionType projectionType;
     glm::mat4 perspective{};
     glm::mat4 orthographic{};
-    glm::mat4 view{};
     glm::vec3 pos;
     glm::fvec2 angles;
     float fov;
@@ -111,13 +115,6 @@ private:
             ySpan = ySpan / aspectRatio;
         }
         orthographic = glm::ortho(-xSpan, xSpan, -ySpan, ySpan, 0.1f, 1000.0f);
-    }
-
-    void updateView() {
-        view = translate(glm::mat4(1.0f), -pos);
-        view = glm::rotate(view, glm::radians(angles.y), glm::vec3(1.0f, 0.0f, 0.0f));
-        view = glm::rotate(view, glm::radians(angles.x), glm::vec3(0.0f, 1.0f, 0.0f));
-        view *= focusedBody->getPosition(7);
     }
 };
 

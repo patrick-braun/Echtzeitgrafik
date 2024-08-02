@@ -30,6 +30,7 @@
 void setupKeybinds(GLFWwindow *window) {
     auto callback = [](GLFWwindow *window, int key, int scancode, int action, int mods) {
         auto settings = static_cast<Settings *>(glfwGetWindowUserPointer(window));
+        auto camera = settings->getCamera();
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
             glfwSetWindowShouldClose(window, 1);
         }
@@ -46,10 +47,37 @@ void setupKeybinds(GLFWwindow *window) {
             settings->halfSpeed();
         }
         if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
-            settings->getCamera()->changeFieldOfView(-5.0f);
+            camera->changeFieldOfView(-5.0f);
         }
         if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
-            settings->getCamera()->changeFieldOfView(5.0f);
+            camera->changeFieldOfView(5.0f);
+        }
+        if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
+            settings->setFocusedBody(1);
+        }
+        if (key == GLFW_KEY_2 && action == GLFW_PRESS) {
+            settings->setFocusedBody(2);
+        }
+        if (key == GLFW_KEY_3 && action == GLFW_PRESS) {
+            settings->setFocusedBody(3);
+        }
+        if (key == GLFW_KEY_4 && action == GLFW_PRESS) {
+            settings->setFocusedBody(4);
+        }
+        if (key == GLFW_KEY_5 && action == GLFW_PRESS) {
+            settings->setFocusedBody(5);
+        }
+        if (key == GLFW_KEY_6 && action == GLFW_PRESS) {
+            settings->setFocusedBody(6);
+        }
+        if (key == GLFW_KEY_7 && action == GLFW_PRESS) {
+            settings->setFocusedBody(7);
+        }
+        if (key == GLFW_KEY_8 && action == GLFW_PRESS) {
+            settings->setFocusedBody(8);
+        }
+        if (key == GLFW_KEY_0 && action == GLFW_PRESS) {
+            settings->setFocusedBody(0);
         }
     };
     glfwSetKeyCallback(window, callback);
@@ -130,11 +158,14 @@ int main(int argc, char **argv) {
 
     SolarSystem solarSystem("sphere.obj");
     Camera camera{
-        glm::vec3(0.0, 0.0, 20.0), glm::fvec2(40.0, 0.0), 45.0, static_cast<float>(DEFAULT_WIDTH) / DEFAULT_HEIGHT,
-        solarSystem.getBody(0),
+        glm::vec3(0.0, 0.0, 20.0),
+        glm::fvec2(40.0, 0.0),
+        45.0,
+        static_cast<float>(DEFAULT_WIDTH) / DEFAULT_HEIGHT,
+        solarSystem.getBody(0), // Default is the sun
         ProjectionType::PERSPECTIVE
     };
-    auto settings = Settings(camera);
+    auto settings = Settings(camera, &solarSystem);
 
     glfwSetWindowUserPointer(window, &settings);
     setupKeybinds(window);
@@ -164,7 +195,7 @@ int main(int argc, char **argv) {
             exit(1);
         }
 
-        glm::mat4 screenSpaceTransform = camera->getProjection() * camera->getView();
+        glm::mat4 screenSpaceTransform = camera->getProjection() * camera->calcView(simTime);
         for (int i = 0; i < solarSystem.getNumBodies(); ++i) {
             auto model = solarSystem.getBody(i)->getTransformationMatrix(simTime);
             try {

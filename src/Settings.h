@@ -6,10 +6,12 @@
 #define SETTINGS_H
 #include "CelestialBody.h"
 #include "Camera.h"
+#include "SolarSystem.h"
 
 class Settings {
 public:
-    explicit Settings(Camera cam, float speed = 7): cam(cam), speed(speed) {
+    explicit Settings(Camera cam, SolarSystem *solarSystem, float speed = 8.0): cam(cam), solarSystem(solarSystem),
+        speed(speed) {
     }
 
     [[nodiscard]] float getSpeed() const {
@@ -42,6 +44,11 @@ public:
         return &cam;
     }
 
+    void setFocusedBody(int idx) {
+        auto body = solarSystem->getBody(idx);
+        cam.setFocusedBody(body);
+    }
+
 
     void setLastMousePos(double xPos, double yPos) {
         lastMousePos = glm::dvec2(xPos, yPos);
@@ -62,6 +69,7 @@ public:
 
 private:
     Camera cam;
+    SolarSystem *solarSystem;
     glm::dvec2 lastMousePos = {0.0, 0.0};
     bool paused = false;
     float speed = 1;
