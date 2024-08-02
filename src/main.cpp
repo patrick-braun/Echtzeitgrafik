@@ -45,10 +45,10 @@ void setupKeybinds(GLFWwindow *window) {
         if (key == GLFW_KEY_LEFT && action == GLFW_PRESS) {
             settings->halfSpeed();
         }
-        if (key == GLFW_KEY_W && action == GLFW_PRESS) {
+        if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
             settings->changeFieldOfView(-5.0f);
         }
-        if (key == GLFW_KEY_S && action == GLFW_PRESS) {
+        if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
             settings->changeFieldOfView(5.0f);
         }
     };
@@ -71,8 +71,23 @@ void registerDebugHandler() {
     }
 }
 
-void framebufferSizeCallback(GLFWwindow* window, const int width, const int height)
-{
+void registerMouseHandler(GLFWwindow *window) {
+    const auto callback = [](GLFWwindow *window, double xPos, double yPos) {
+        auto settings = static_cast<Settings *>(glfwGetWindowUserPointer(window));
+        settings->updateMouse(xPos, yPos);
+    };
+    glfwSetCursorPosCallback(window, callback);
+}
+
+void registerScrollHandler(GLFWwindow *window) {
+    const auto callback = [](GLFWwindow *window, double xOffset, double yOffset) {
+        auto settings = static_cast<Settings *>(glfwGetWindowUserPointer(window));
+        settings->changeFieldOfView(static_cast<float>(yOffset));
+    };
+    glfwSetScrollCallback(window, callback);
+}
+
+void framebufferSizeCallback(GLFWwindow *window, const int width, const int height) {
     const auto settings = static_cast<Settings *>(glfwGetWindowUserPointer(window));
     glViewport(0, 0, width, height);
     settings->setAspectRatio(static_cast<float>(width) / static_cast<float>(height));
@@ -82,9 +97,19 @@ void framebufferSizeCallback(GLFWwindow* window, const int width, const int heig
 int main(int argc, char **argv) {
     registerDebugHandler();
     GLFWwindow *window = initAndCreateWindow(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glViewport(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT);
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
-    auto settings = Settings(static_cast<float>(DEFAULT_WIDTH) / DEFAULT_HEIGHT);
+    registerMouseHandler(window);
+    registerScrollHandler(window);
+
+    CameraInfo cam{
+        glm::vec3(0.0, 0.0, 20.0),
+        glm::fvec2(40.0, 0.0),
+        45.0,
+        static_cast<float>(DEFAULT_WIDTH) / DEFAULT_HEIGHT
+    };
+    auto settings = Settings(cam);
 
     const std::string vertexShaderSource = readResToString("shader.vert");
     const std::string fragmentShaderSource = readResToString("shader.frag");
@@ -119,9 +144,7 @@ int main(int argc, char **argv) {
     double fpsMeasureThreshold = 0;
     double simTime = 0;
 
-    auto viewPos = glm::vec3(0.0f, 0.0f, 20.0f);
-    auto view = translate(glm::mat4(1.0f), -viewPos);
-    view = glm::rotate(view, glm::radians(40.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
 
     double timeSnapshot = glfwGetTime();
     double prevTimeSnapshot;
@@ -132,7 +155,7 @@ int main(int argc, char **argv) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         try {
-            program.setUniform("u_viewPos", viewPos);
+            program.setUniform("u_viewPos", settings.getCameraInfo().pos);
             program.setUniform("u_light", l);
         } catch (const std::runtime_error &e) {
             std::cerr << e.what() << std::endl;
@@ -140,7 +163,7 @@ int main(int argc, char **argv) {
             exit(1);
         }
 
-        glm::mat4 screenSpaceTransform = settings.getProjection() * view;
+        glm::mat4 screenSpaceTransform = settings.getProjection() * settings.getView();
         for (int i = 0; i < solarSystem.getNumBodies(); ++i) {
             auto model = solarSystem.getBody(i)->getTransformationMatrix(simTime);
             try {
