@@ -23,6 +23,9 @@
 
 #include <glm/gtx/string_cast.hpp>
 
+#define DEFAULT_WIDTH 800
+#define DEFAULT_HEIGHT 600
+
 
 void setupKeybinds(GLFWwindow *window) {
     auto callback = [](GLFWwindow *window, int key, int scancode, int action, int mods) {
@@ -78,10 +81,10 @@ void framebufferSizeCallback(GLFWwindow* window, const int width, const int heig
 
 int main(int argc, char **argv) {
     registerDebugHandler();
-    GLFWwindow *window = initAndCreateWindow();
-    glViewport(0, 0, 800, 600);
+    GLFWwindow *window = initAndCreateWindow(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+    glViewport(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT);
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
-    auto settings = Settings();
+    auto settings = Settings(static_cast<float>(DEFAULT_WIDTH) / DEFAULT_HEIGHT);
 
     const std::string vertexShaderSource = readResToString("shader.vert");
     const std::string fragmentShaderSource = readResToString("shader.frag");

@@ -13,8 +13,15 @@ enum class ProjectionType {
 
 class Settings {
 public:
-    Settings() : projectionType(ProjectionType::PERSPECTIVE) {
+    Settings(float aspectRatio, ProjectionType projection_type = ProjectionType::PERSPECTIVE, int speed = 7,
+             float fieldOfView = 45.0f)
+        : projectionType(projection_type),
+          speed(speed),
+          fieldOfView(fieldOfView),
+          aspectRatio(aspectRatio) {
+        updateProjection();
     }
+
 
     void setProjectionType(ProjectionType projectionType) {
         this->projectionType = projectionType;
@@ -48,8 +55,8 @@ public:
 
     [[nodiscard]] glm::mat4 getProjection() const {
         return projectionType == ProjectionType::PERSPECTIVE
-                             ? perspective
-                             : orthographic;
+                   ? perspective
+                   : orthographic;
     }
 
     void setAspectRatio(const float newAspectRatio) {
@@ -66,11 +73,11 @@ public:
 private:
     ProjectionType projectionType;
     bool paused = false;
-    int speed = 7;
-    float fieldOfView = 45.0f;
-    float aspectRatio = 8.0f / 6.0f;
-    glm::mat4 perspective = glm::perspective(glm::radians(fieldOfView), 800.0f / 600.0f, 0.1f, 1000.0f);
-    glm::mat4 orthographic = glm::ortho(-4.0f, 4.0f, -3.0f, 3.0f, 0.1f, 1000.0f);
+    int speed = 1;
+    float fieldOfView = 0;
+    float aspectRatio = 0;
+    glm::mat4 perspective;
+    glm::mat4 orthographic;
 
     void updateProjection() {
         perspective = glm::perspective(glm::radians(fieldOfView), aspectRatio, 0.1f, 1000.0f);
@@ -78,10 +85,9 @@ private:
         float xSpan = 8 * (fieldOfView / 45.0f);
         float ySpan = 8 * (fieldOfView / 45.0f);
 
-        if (aspectRatio > 1){
+        if (aspectRatio > 1) {
             xSpan *= aspectRatio;
-        }
-        else{
+        } else {
             ySpan = ySpan / aspectRatio;
         }
         orthographic = glm::ortho(-xSpan, xSpan, -ySpan, ySpan, 0.1f, 1000.0f);
