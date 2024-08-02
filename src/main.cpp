@@ -34,7 +34,7 @@ void setupKeybinds(GLFWwindow *window) {
             glfwSetWindowShouldClose(window, 1);
         }
         if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
-            settings->toggleProjectionType();
+            settings->getCamera()->toggleProjectionType();
         }
         if (key == GLFW_KEY_P && action == GLFW_PRESS) {
             settings->togglePause();
@@ -46,10 +46,10 @@ void setupKeybinds(GLFWwindow *window) {
             settings->halfSpeed();
         }
         if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
-            settings->changeFieldOfView(-5.0f);
+            settings->getCamera()->changeFieldOfView(-5.0f);
         }
         if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
-            settings->changeFieldOfView(5.0f);
+            settings->getCamera()->changeFieldOfView(5.0f);
         }
     };
     glfwSetKeyCallback(window, callback);
@@ -82,7 +82,7 @@ void registerMouseHandler(GLFWwindow *window) {
 void registerScrollHandler(GLFWwindow *window) {
     const auto callback = [](GLFWwindow *window, double xOffset, double yOffset) {
         auto settings = static_cast<Settings *>(glfwGetWindowUserPointer(window));
-        settings->changeFieldOfView(static_cast<float>(yOffset));
+        settings->getCamera()->changeFieldOfView(static_cast<float>(yOffset));
     };
     glfwSetScrollCallback(window, callback);
 }
@@ -90,7 +90,7 @@ void registerScrollHandler(GLFWwindow *window) {
 void framebufferSizeCallback(GLFWwindow *window, const int width, const int height) {
     const auto settings = static_cast<Settings *>(glfwGetWindowUserPointer(window));
     glViewport(0, 0, width, height);
-    settings->setAspectRatio(static_cast<float>(width) / static_cast<float>(height));
+    settings->getCamera()->setAspectRatio(static_cast<float>(width) / static_cast<float>(height));
 }
 
 
@@ -102,14 +102,6 @@ int main(int argc, char **argv) {
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
     registerMouseHandler(window);
     registerScrollHandler(window);
-
-    CameraInfo cam{
-        glm::vec3(0.0, 0.0, 20.0),
-        glm::fvec2(40.0, 0.0),
-        45.0,
-        static_cast<float>(DEFAULT_WIDTH) / DEFAULT_HEIGHT
-    };
-    auto settings = Settings(cam);
 
     const std::string vertexShaderSource = readResToString("shader.vert");
     const std::string fragmentShaderSource = readResToString("shader.frag");
@@ -134,16 +126,24 @@ int main(int argc, char **argv) {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glEnable(GL_DEPTH_TEST);
     glfwSwapInterval(1); // Enable vsync
+
+
+    SolarSystem solarSystem("sphere.obj");
+    Camera camera{
+        glm::vec3(0.0, 0.0, 20.0), glm::fvec2(40.0, 0.0), 45.0, static_cast<float>(DEFAULT_WIDTH) / DEFAULT_HEIGHT,
+        solarSystem.getBody(0),
+        ProjectionType::PERSPECTIVE
+    };
+    auto settings = Settings(camera);
+
     glfwSetWindowUserPointer(window, &settings);
     setupKeybinds(window);
 
-    SolarSystem solarSystem("sphere.obj");
     auto l = solarSystem.getLight();
 
     int frames = 0;
     double fpsMeasureThreshold = 0;
     double simTime = 0;
-
 
 
     double timeSnapshot = glfwGetTime();
@@ -153,9 +153,10 @@ int main(int argc, char **argv) {
         program.use();
         glClearColor(0.0f, 0.1f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        Camera *camera = settings.getCamera();
 
         try {
-            program.setUniform("u_viewPos", settings.getCameraInfo().pos);
+            program.setUniform("u_viewPos", camera->getPos());
             program.setUniform("u_light", l);
         } catch (const std::runtime_error &e) {
             std::cerr << e.what() << std::endl;
@@ -163,7 +164,7 @@ int main(int argc, char **argv) {
             exit(1);
         }
 
-        glm::mat4 screenSpaceTransform = settings.getProjection() * settings.getView();
+        glm::mat4 screenSpaceTransform = camera->getProjection() * camera->getView();
         for (int i = 0; i < solarSystem.getNumBodies(); ++i) {
             auto model = solarSystem.getBody(i)->getTransformationMatrix(simTime);
             try {

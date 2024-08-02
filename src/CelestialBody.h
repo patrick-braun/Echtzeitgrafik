@@ -53,6 +53,15 @@ public:
         return model;
     }
 
+    [[nodiscard]] glm::mat4 getPosition(const double timeInHours) const {
+        auto model = glm::mat4(1.0f);
+        model = rotate(model, static_cast<float>(glm::radians(timeInHours * info.orbitDegreesPerHour)),
+                       glm::vec3(0.0f, 1.0f, 0.0f));
+        model = translate(model, glm::vec3(info.distanceFromParent, 0.0f, 0.0f));
+                       glm::vec3(0.0f, 1.0f, 0.0f);
+        return model;
+    }
+
     [[nodiscard]] bool getSelfEmitting() const {
         return this->info.selfEmitting;
     }
